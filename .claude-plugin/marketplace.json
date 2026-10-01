@@ -1,0 +1,14 @@
+{
+  "name": "claude-multimedia-marketplace",
+  "description": "Claude / Cowork 多媒体处理插件市场",
+  "owner": {
+    "name": "NannaOlympicBroadcast"
+  },
+  "plugins": [
+    {
+      "name": "claude-multimedia",
+      "source": "./",
+      "description": "yt-dlp + aria2 下载、Gemini 音视频分析、腾讯云转写、Edge TTS 配音、通用生图、FFmpeg 剪辑/屏幕墙、librosa 音乐分析"
+    }
+  ]
+}

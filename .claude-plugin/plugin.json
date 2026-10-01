@@ -1,0 +1,12 @@
+{
+  "name": "claude-multimedia",
+  "displayName": "Claude Multimedia Toolkit",
+  "version": "0.1.0",
+  "description": "多媒体处理插件：yt-dlp 下载(自动更新+cookie)、aria2 多线程加速、Gemini 最新模型音视频分析、腾讯云 ASR 转写、Edge TTS 配音、GPT Image / Nano Banana / Seedream 通用生图、FFmpeg 剪辑与多时间点屏幕墙、librosa 音乐分析。",
+  "author": {
+    "name": "NannaOlympicBroadcast"
+  },
+  "repository": "https://github.com/NannaOlympicBroadcast/claude-multimedia-plugin",
+  "license": "MIT",
+  "keywords": ["multimedia", "video", "audio", "yt-dlp", "aria2", "gemini", "tencent-asr", "edge-tts", "image-generation", "ffmpeg", "librosa", "cowork"]
+}
