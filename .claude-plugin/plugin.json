@@ -1,8 +1,8 @@
 {
   "name": "multimedia-studio",
   "displayName": "Multimedia Studio",
-  "version": "0.3.0",
-  "description": "多媒体处理插件：yt-dlp 下载(自动更新+cookie)、aria2 多线程加速、Gemini 最新模型音视频分析、腾讯云 ASR 转写、Edge TTS 配音、GPT Image / Nano Banana / Seedream 通用生图、Gemini Omni / 即梦 CLI 生视频、FFmpeg 剪辑与多时间点屏幕墙、librosa 音乐分析；本地模式：通过本机 MCP 服务调用用户自己的显卡跑 Whisper、Real-ESRGAN 超分、RIFE 插帧、Demucs 分轨。",
+  "version": "0.4.0",
+  "description": "多媒体处理插件：yt-dlp 下载(自动更新+cookie)、aria2 多线程加速、Gemini 最新模型音视频分析、腾讯云 ASR 转写、Edge TTS 配音、GPT Image / Nano Banana / Seedream 通用生图、Gemini Omni / 即梦 CLI 生视频、Antigravity CLI（agy）Gemini 子代理、FFmpeg 剪辑与多时间点屏幕墙、librosa 音乐分析；本地模式：通过本机 MCP 服务调用用户自己的显卡跑 Whisper、Real-ESRGAN 超分、RIFE 插帧、Demucs 分轨。",
   "author": {
     "name": "NannaOlympicBroadcast"
   },
@@ -31,7 +31,10 @@
     "gemini-omni",
     "jimeng",
     "dreamina",
-    "seedance"
+    "seedance",
+    "antigravity",
+    "agy",
+    "subagent"
   ],
   "userConfig": {
     "python_command": {

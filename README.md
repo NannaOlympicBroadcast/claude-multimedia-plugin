@@ -2,7 +2,7 @@
 
 插件名 `multimedia-studio`（`claude-` 前缀是 Anthropic 保留名，第三方插件不能使用）。
 
-一个 Claude Code / Claude Cowork 插件，把常见的多媒体工作流封装成 11 个技能 + 一个本地 GPU MCP 服务 + 一组可独立运行的 Python 脚本：
+一个 Claude Code / Claude Cowork 插件，把常见的多媒体工作流封装成 12 个技能 + 1 个 Claude 子代理 + 一个本地 GPU MCP 服务 + 一组可独立运行的 Python 脚本：
 
 | 技能 | 功能 | 脚本 |
 |---|---|---|
@@ -13,6 +13,7 @@
 | `edge-tts-dubbing` | Edge TTS 配音；SRT 逐句对齐配音轨，可直接混入视频（ducking） | `scripts/edge_tts_dub.py` |
 | `image-generation` | 通用生图：按配置自动选 **最新 GPT Image / Nano Banana / Seedream** | `scripts/image_gen.py` |
 | `video-generation` | AI 生视频：**Gemini Omni 最新模型**（自动发现）或**即梦 dreamina CLI**（Seedance），文/图生视频、首尾帧、视频续写、多轮修改 | `scripts/video_gen.py` |
+| `antigravity-subagent` | 把多模态任务交给 **Google Antigravity CLI（agy）** 的 Gemini agent：原生理解图/视频/音频，内置 `generate_image`（Nano Banana 2）出图；插件自带 `media-studio` agent 与 Claude 子代理 `antigravity-runner` | `scripts/antigravity_agent.py`、`antigravity/agents/media-studio.md`、`agents/antigravity-runner.md` |
 | `ffmpeg-video-editing` | FFmpeg 剪辑；**输入多个时间点直接抽帧拼成屏幕墙** | `scripts/ffmpeg_tools.py` |
 | `librosa-music-analysis` | BPM/节拍、调性、响度、音色、段落结构、能量曲线 | `scripts/music_analyze.py` |
 | `local-gpu-mode` | **本地模式**：用用户自己电脑的显卡跑 Whisper 转写、Real-ESRGAN 图片/视频超分、RIFE 插帧、Demucs 分轨 | `scripts/local_gpu.py`、`scripts/local_gpu_mcp.py`（MCP） |
@@ -100,6 +101,9 @@ python3 scripts/local_gpu.py install whisper && python3 scripts/local_gpu.py whi
 | Demucs | 4.1.0；权重托管在 `dl.fbaipublicfiles.com/demucs/` | [PyPI demucs](https://pypi.org/project/demucs/) |
 | Gemini Omni | `gemini-omni-1.1-flash` 于 2026-08-27 GA（视频续写、首尾帧、分辨率参数）；2026-06-30 发布 `gemini-omni-flash-preview`；接口 `POST /v1beta/interactions`，单段 3–10 秒，多轮续写最长 40 秒 | [Gemini changelog](https://ai.google.dev/gemini-api/docs/changelog)、[Omni guide](https://ai.google.dev/gemini-api/docs/omni) |
 | 即梦 CLI | 官方 `dreamina` CLI，安装 `curl -fsSL https://jimeng.jianying.com/cli \| bash`，OAuth 设备码登录，`query_result --submit_id --download_dir`；当前版本 1.4.18（2026-09-10，“视频生成支持比例控制”） | [Dreamina CLI 官方页](https://dreamina.capcut.com/tools/dreamina-cli)、官方 version.json |
+| Antigravity CLI | `agy` headless：`-p`、`--output-format json/stream-json`、`--agent`、`--model`、`--conversation`、`--print-timeout`（默认 5m）、`--dangerously-skip-permissions`；无法获批的工具会被软拒绝 | [Headless mode](https://antigravity.google/docs/cli/headless) |
+| Antigravity 安装/认证 | `curl -fsSL https://antigravity.google/cli/install.sh \| bash`（发布清单 + SHA-512 校验，当前 1.2.14）；API Key 模式需在 settings.json 设 `modelProvider: gemini` | [Installation & auth](https://antigravity.google/docs/cli/install)、官方 install.sh |
+| Antigravity 生图/子代理 | `generate_image` 内置工具使用 Nano Banana 2；自定义 agent 放 `.agents/agents/<name>.md` | [Models](https://antigravity.google/docs/models)、[SDK tools](https://antigravity.google/docs/sdk/tools)、[Subagents](https://antigravity.google/docs/subagents) |
 | Cowork 执行模型 | shell 命令在隔离 VM 中执行；本地插件 MCP 服务在设备上原生运行 | [Aurascape: Claude Cowork data access](https://aurascape.ai/answers/claude-cowork-data-access) |
 | Cowork 插件结构 | `.claude-plugin/plugin.json` + `skills/<name>/SKILL.md`；skill 内容中 `${CLAUDE_PLUGIN_ROOT}` 会被替换 | [Plugins reference](https://code.claude.com/docs/en/plugins-reference) |
 
@@ -108,7 +112,9 @@ python3 scripts/local_gpu.py install whisper && python3 scripts/local_gpu.py whi
 ```
 .claude-plugin/plugin.json         插件清单
 .claude-plugin/marketplace.json    单插件市场（source: ./）
-skills/*/SKILL.md                  11 个技能
+skills/*/SKILL.md                  12 个技能
+agents/antigravity-runner.md       Claude 子代理：委派任务给 Antigravity
+antigravity/agents/media-studio.md Antigravity 侧的多模态媒体 agent
 .mcp.json                          本地 GPU MCP 服务（local-gpu）
 scripts/                           可独立运行的 Python 工具
 config.example.env                 配置模板
