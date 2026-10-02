@@ -22,6 +22,7 @@ EXIT_OK = 0
 EXIT_ERROR = 1
 EXIT_CONFIG = 2          # missing key / missing binary -> ask the user to configure
 EXIT_NEED_COOKIES = 3    # yt-dlp needs cookies -> ask the user for a cookies file
+EXIT_NO_GPU = 4          # local mode found no usable GPU -> ask the user (never silently use CPU)
 
 
 class MMError(RuntimeError):
@@ -220,6 +221,21 @@ def fmt_ts(seconds: float, sep: str = ".") -> str:
     m, rem = divmod(rem, 60_000)
     s, ms = divmod(rem, 1000)
     return f"{h:02d}:{m:02d}:{s:02d}{sep}{ms:03d}"
+
+
+def write_transcript(segs: list[dict], prefix: Path, meta: dict) -> None:
+    """Write <prefix>.srt / .txt / .json from [{start, end, speaker, text}]."""
+    prefix.parent.mkdir(parents=True, exist_ok=True)
+    with (prefix.with_suffix(".srt")).open("w", encoding="utf-8") as f:
+        for i, s in enumerate(segs, 1):
+            spk = f"[S{s['speaker']}] " if s.get("speaker") not in (None, -1) and meta.get("speakers") else ""
+            f.write(f"{i}\n{fmt_ts(s['start'], ',')} --> {fmt_ts(s['end'], ',')}\n{spk}{s['text']}\n\n")
+    with (prefix.with_suffix(".txt")).open("w", encoding="utf-8") as f:
+        for s in segs:
+            spk = f"说话人{s['speaker']}: " if s.get("speaker") not in (None, -1) and meta.get("speakers") else ""
+            f.write(f"[{fmt_ts(s['start'])[:-4]}] {spk}{s['text']}\n")
+    prefix.with_suffix(".json").write_text(json.dumps({"meta": meta, "segments": segs}, ensure_ascii=False, indent=2),
+                                           encoding="utf-8")
 
 
 def version_tuple(text: str) -> tuple[int, ...]:

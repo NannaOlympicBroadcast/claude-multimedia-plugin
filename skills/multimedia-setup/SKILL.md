@@ -1,6 +1,6 @@
 ---
 name: multimedia-setup
-description: 安装/检查 claude-multimedia 插件的运行环境（aria2、ffmpeg、deno、yt-dlp 最新版、edge-tts、librosa 等）并引导配置 API Key（Gemini、OpenAI、腾讯云、火山引擎/BytePlus）。首次使用插件、脚本报“缺少依赖/配置”(退出码 2)、或用户询问如何配置时使用。
+description: 安装/检查 multimedia-studio 插件的运行环境（aria2、ffmpeg、deno、yt-dlp 最新版、edge-tts、librosa 等）并引导配置 API Key（Gemini、OpenAI、腾讯云、火山引擎/BytePlus）。首次使用插件、脚本报“缺少依赖/配置”(退出码 2)、或用户询问如何配置时使用。
 ---
 
 # 环境安装与配置

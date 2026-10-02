@@ -1,6 +1,8 @@
-# Claude Multimedia Toolkit（Claude / Cowork 多媒体处理插件）
+# Multimedia Studio（Claude / Cowork 多媒体处理插件）
 
-一个 Claude Code / Claude Cowork 插件，把常见的多媒体工作流封装成 9 个技能 + 一组可独立运行的 Python 脚本：
+插件名 `multimedia-studio`（`claude-` 前缀是 Anthropic 保留名，第三方插件不能使用）。
+
+一个 Claude Code / Claude Cowork 插件，把常见的多媒体工作流封装成 10 个技能 + 一个本地 GPU MCP 服务 + 一组可独立运行的 Python 脚本：
 
 | 技能 | 功能 | 脚本 |
 |---|---|---|
@@ -12,6 +14,7 @@
 | `image-generation` | 通用生图：按配置自动选 **最新 GPT Image / Nano Banana / Seedream** | `scripts/image_gen.py` |
 | `ffmpeg-video-editing` | FFmpeg 剪辑；**输入多个时间点直接抽帧拼成屏幕墙** | `scripts/ffmpeg_tools.py` |
 | `librosa-music-analysis` | BPM/节拍、调性、响度、音色、段落结构、能量曲线 | `scripts/music_analyze.py` |
+| `local-gpu-mode` | **本地模式**：用用户自己电脑的显卡跑 Whisper 转写、Real-ESRGAN 图片/视频超分、RIFE 插帧、Demucs 分轨 | `scripts/local_gpu.py`、`scripts/local_gpu_mcp.py`（MCP） |
 | `multimedia-setup` | 一键安装依赖 + 自检 + 配置 key 指引 | `scripts/setup_env.sh`、`scripts/doctor.py` |
 
 ## 安装
@@ -21,7 +24,7 @@
 ```bash
 # 添加本仓库为插件市场并安装
 /plugin marketplace add NannaOlympicBroadcast/claude-multimedia-plugin
-/plugin install claude-multimedia@claude-multimedia-marketplace
+/plugin install multimedia-studio@multimedia-studio-marketplace
 
 # 或本地调试
 claude --plugin-dir /path/to/claude-multimedia-plugin
@@ -29,13 +32,36 @@ claude --plugin-dir /path/to/claude-multimedia-plugin
 
 ### Claude Cowork
 
-在 Cowork 的插件管理中添加仓库 `NannaOlympicBroadcast/claude-multimedia-plugin` 作为市场后安装 `claude-multimedia`，或上传本目录的 zip。插件不包含顶层 `bin/` 目录，符合 Cowork 的安装要求。
+在 Cowork 的插件管理中添加仓库 `NannaOlympicBroadcast/claude-multimedia-plugin` 作为市场后安装 `multimedia-studio`，或上传本目录的 zip。插件不包含顶层 `bin/` 目录，符合 Cowork 的安装要求。
 
 ### 依赖
 
 ```bash
 bash scripts/setup_env.sh      # 安装 aria2、ffmpeg、yt-dlp[default]、deno、edge-tts、librosa…并自检
 python3 scripts/doctor.py      # 仅自检
+```
+
+## 本地模式（用用户自己的显卡）
+
+| 运行位置 | 连接方式 |
+|---|---|
+| Claude Code 跑在用户电脑上（CLI、桌面 App，或 `claude remote-control` 后从手机/网页远程驱动） | 技能直接调用 `scripts/local_gpu.py`，进程就在用户电脑上 |
+| Claude Cowork 桌面 App | shell 在隔离 VM 中、拿不到宿主机 GPU；插件通过 `.mcp.json` 注册的 `local-gpu` MCP 服务在宿主机原生运行，Claude 调用其工具（`whisper_transcribe`、`upscale_video` 等，长任务返回 job_id 轮询） |
+| 云端容器会话 | 连不到用户电脑，需改到上面两种会话中执行 GPU 任务 |
+
+| 引擎 | GPU 后端 | 说明 |
+|---|---|---|
+| Whisper | faster-whisper（CTranslate2, NVIDIA CUDA 12 + cuDNN 9）/ mlx-whisper（Apple Silicon） | 默认 `large-v3-turbo`，模型从 Hugging Face 经 aria2c 下载，支持 `HF_ENDPOINT` 镜像 |
+| 超分辨率 | Real-ESRGAN ncnn-vulkan（NVIDIA / AMD / Intel / Apple，经 Vulkan/MoltenVK） | 图片、文件夹、视频（分段处理、可续跑、保留音轨、自动选硬件编码器） |
+| 插帧 | RIFE ncnn-vulkan（默认 rife-v4.6） | 2× 或指定目标帧率 |
+| 分轨 | Demucs（PyTorch CUDA / MPS） | 权重预先用 aria2c 下载到 torch hub 缓存 |
+
+没有可用 GPU 时一律以退出码 4 停止，只有用户明确同意才用 `--allow-cpu`。MCP 服务的 Python 命令可在插件配置 `python_command` 中修改（Windows 填 `python` 或 `py`）。
+
+```bash
+python3 scripts/local_gpu.py detect
+python3 scripts/local_gpu.py install realesrgan && python3 scripts/local_gpu.py upscale-video in.mp4 --model realesr-animevideov3 --scale 2
+python3 scripts/local_gpu.py install whisper && python3 scripts/local_gpu.py whisper talk.mp4 --language zh
 ```
 
 ## 配置
@@ -67,6 +93,11 @@ python3 scripts/doctor.py      # 仅自检
 | Seedream | 5.0 pro `doubao-seedream-5-0-pro-260628`、5.0 flash `doubao-seedream-5-0-flash-260915`、5.0 lite `doubao-seedream-5-0-260128`；`POST /api/v3/images/generations`；5.0 pro/flash 不支持组图参数 | [火山方舟图片生成教程](https://www.volcengine.com/docs/ark/seedream-4-0-5-0)、[图片生成 API](https://docs.volcengine.com/docs/82379/1541523)；BytePlus 模型 ID 来自第三方文档 [LaoZhang API](https://docs.laozhang.ai/en/api-capabilities/seedream-image) |
 | 腾讯云 ASR | `CreateRecTask` / `DescribeTaskStatus`，Version 2019-06-14；大模型 2.0 引擎 `16k_zh_en_2.0`、`16k_zh_en_meeting` | [录音文件识别请求](https://cloud.tencent.com/document/product/1093/37823)、[结果查询](https://cloud.tencent.com/document/product/1093/37822) |
 | edge-tts | 7.2.8（2026-03-22） | [PyPI edge-tts](https://pypi.org/project/edge-tts/) |
+| faster-whisper | 1.2.1（2025-10-31）；GPU 需 cuBLAS for CUDA 12 + cuDNN 9；支持 large-v3 / turbo / distil-large-v3 | [PyPI faster-whisper](https://pypi.org/project/faster-whisper/) |
+| Real-ESRGAN ncnn-vulkan | 最新 release v0.2.5.0（包名 `realesrgan-ncnn-vulkan-20220424-*.zip`） | [Real-ESRGAN releases](https://github.com/xinntao/Real-ESRGAN/releases) |
+| RIFE ncnn-vulkan | release `20221029` | [rife-ncnn-vulkan releases](https://github.com/nihui/rife-ncnn-vulkan/releases) |
+| Demucs | 4.1.0；权重托管在 `dl.fbaipublicfiles.com/demucs/` | [PyPI demucs](https://pypi.org/project/demucs/) |
+| Cowork 执行模型 | shell 命令在隔离 VM 中执行；本地插件 MCP 服务在设备上原生运行 | [Aurascape: Claude Cowork data access](https://aurascape.ai/answers/claude-cowork-data-access) |
 | Cowork 插件结构 | `.claude-plugin/plugin.json` + `skills/<name>/SKILL.md`；skill 内容中 `${CLAUDE_PLUGIN_ROOT}` 会被替换 | [Plugins reference](https://code.claude.com/docs/en/plugins-reference) |
 
 ## 目录结构
@@ -74,7 +105,8 @@ python3 scripts/doctor.py      # 仅自检
 ```
 .claude-plugin/plugin.json         插件清单
 .claude-plugin/marketplace.json    单插件市场（source: ./）
-skills/*/SKILL.md                  9 个技能
+skills/*/SKILL.md                  10 个技能
+.mcp.json                          本地 GPU MCP 服务（local-gpu）
 scripts/                           可独立运行的 Python 工具
 config.example.env                 配置模板
 ```

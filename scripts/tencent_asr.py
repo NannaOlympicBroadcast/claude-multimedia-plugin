@@ -30,7 +30,10 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from mmcommon import MMError, cfg, fmt_ts, main_guard, media_duration, require_bin, require_cfg, run  # noqa: E402
+from mmcommon import (  # noqa: E402
+    MMError, cfg, fmt_ts, main_guard, media_duration, require_bin, require_cfg, run,
+    write_transcript as write_outputs,
+)
 
 HOST = "asr.tencentcloudapi.com"
 SERVICE = "asr"
@@ -145,20 +148,6 @@ def to_segments(data: dict, offset: float) -> list[dict]:
         # ResTextFormat=0 returns only "[0:0.020,0:1.420]  text" lines; keep them as one block.
         segs.append({"start": offset, "end": offset, "speaker": None, "text": data["Result"].strip()})
     return segs
-
-
-def write_outputs(segs: list[dict], prefix: Path, meta: dict) -> None:
-    prefix.parent.mkdir(parents=True, exist_ok=True)
-    with (prefix.with_suffix(".srt")).open("w", encoding="utf-8") as f:
-        for i, s in enumerate(segs, 1):
-            spk = f"[S{s['speaker']}] " if s.get("speaker") not in (None, -1) and meta.get("speakers") else ""
-            f.write(f"{i}\n{fmt_ts(s['start'], ',')} --> {fmt_ts(s['end'], ',')}\n{spk}{s['text']}\n\n")
-    with (prefix.with_suffix(".txt")).open("w", encoding="utf-8") as f:
-        for s in segs:
-            spk = f"说话人{s['speaker']}: " if s.get("speaker") not in (None, -1) and meta.get("speakers") else ""
-            f.write(f"[{fmt_ts(s['start'])[:-4]}] {spk}{s['text']}\n")
-    prefix.with_suffix(".json").write_text(json.dumps({"meta": meta, "segments": segs}, ensure_ascii=False, indent=2),
-                                           encoding="utf-8")
 
 
 @main_guard

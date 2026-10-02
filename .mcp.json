@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "local-gpu": {
+      "command": "${user_config.python_command}",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/local_gpu_mcp.py"
+      ]
+    }
+  }
+}

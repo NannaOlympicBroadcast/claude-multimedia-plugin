@@ -1,12 +1,39 @@
 {
-  "name": "claude-multimedia",
-  "displayName": "Claude Multimedia Toolkit",
-  "version": "0.1.0",
-  "description": "多媒体处理插件：yt-dlp 下载(自动更新+cookie)、aria2 多线程加速、Gemini 最新模型音视频分析、腾讯云 ASR 转写、Edge TTS 配音、GPT Image / Nano Banana / Seedream 通用生图、FFmpeg 剪辑与多时间点屏幕墙、librosa 音乐分析。",
+  "name": "multimedia-studio",
+  "displayName": "Multimedia Studio",
+  "version": "0.2.0",
+  "description": "多媒体处理插件：yt-dlp 下载(自动更新+cookie)、aria2 多线程加速、Gemini 最新模型音视频分析、腾讯云 ASR 转写、Edge TTS 配音、GPT Image / Nano Banana / Seedream 通用生图、FFmpeg 剪辑与多时间点屏幕墙、librosa 音乐分析；本地模式：通过本机 MCP 服务调用用户自己的显卡跑 Whisper、Real-ESRGAN 超分、RIFE 插帧、Demucs 分轨。",
   "author": {
     "name": "NannaOlympicBroadcast"
   },
   "repository": "https://github.com/NannaOlympicBroadcast/claude-multimedia-plugin",
   "license": "MIT",
-  "keywords": ["multimedia", "video", "audio", "yt-dlp", "aria2", "gemini", "tencent-asr", "edge-tts", "image-generation", "ffmpeg", "librosa", "cowork"]
+  "keywords": [
+    "multimedia",
+    "video",
+    "audio",
+    "yt-dlp",
+    "aria2",
+    "gemini",
+    "tencent-asr",
+    "edge-tts",
+    "image-generation",
+    "ffmpeg",
+    "librosa",
+    "cowork",
+    "local-gpu",
+    "whisper",
+    "super-resolution",
+    "real-esrgan",
+    "rife",
+    "demucs"
+  ],
+  "userConfig": {
+    "python_command": {
+      "type": "string",
+      "title": "Python 命令",
+      "description": "本地 GPU MCP 服务使用的 Python 解释器（macOS/Linux 一般为 python3，Windows 可填 python 或 py）",
+      "default": "python3"
+    }
+  }
 }

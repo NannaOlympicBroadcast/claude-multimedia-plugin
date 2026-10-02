@@ -1,0 +1,6 @@
+# 本地 GPU 模式（按需安装，local_gpu.py install 会自动处理）
+faster-whisper>=1.2
+nvidia-cublas-cu12      # Linux/Windows + NVIDIA
+nvidia-cudnn-cu12==9.*  # Linux/Windows + NVIDIA
+mlx-whisper             # Apple Silicon
+demucs>=4.1             # 另需 CUDA/MPS 版 torch

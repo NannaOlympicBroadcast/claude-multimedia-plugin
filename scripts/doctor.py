@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check binaries, Python packages and configured API keys for the claude-multimedia plugin."""
+"""Check binaries, Python packages and configured API keys for the multimedia-studio plugin."""
 from __future__ import annotations
 
 import importlib
